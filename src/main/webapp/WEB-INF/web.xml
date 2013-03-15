@@ -10,10 +10,26 @@
       <servlet-name>FacebookServlet</servlet-name>
       <servlet-class>org.jboss.facebook.FacebookServlet</servlet-class>
    </servlet>
+  <servlet>
+    <servlet-name>FacebookServlet2</servlet-name>
+    <servlet-class>org.jboss.facebook.FacebookServlet2</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>GoogleServlet</servlet-name>
+    <servlet-class>org.jboss.google.GoogleServlet</servlet-class>
+  </servlet>
 
    <servlet-mapping>
       <servlet-name>FacebookServlet</servlet-name>
       <url-pattern>/test1</url-pattern>
    </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>FacebookServlet2</servlet-name>
+    <url-pattern>/test2</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GoogleServlet</servlet-name>
+    <url-pattern>/test3</url-pattern>
+  </servlet-mapping>
 
 </web-app>

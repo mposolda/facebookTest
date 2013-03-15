@@ -110,7 +110,7 @@ public class FacebookServlet extends HttpServlet
       return token;
    }
 
-   private String sendRequestAndGetResponse(String url) throws IOException
+   static String sendRequestAndGetResponse(String url) throws IOException
    {
       BufferedReader in = null;
       StringBuilder response = new StringBuilder();
