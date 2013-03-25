@@ -25,6 +25,42 @@
         <artifactId>json</artifactId>
         <version>20070829</version>
       </dependency>
+
+     <!-- Google oauth dependencies -->
+     <dependency>
+       <groupId>com.google.oauth-client</groupId>
+       <artifactId>google-oauth-client</artifactId>
+       <version>1.14.1-beta</version>
+     </dependency>
+     <dependency>
+       <groupId>com.google.api-client</groupId>
+       <artifactId>google-api-client</artifactId>
+       <version>1.14.1-beta</version>
+     </dependency>
+     <dependency>
+       <groupId>com.google.http-client</groupId>
+       <artifactId>google-http-client-jackson</artifactId>
+       <version>1.14.1-beta</version>
+     </dependency>
+
+     <!-- Only for precondition class -->
+     <dependency>
+       <groupId>com.google.guava</groupId>
+       <artifactId>guava</artifactId>
+       <version>11.0.2</version>
+     </dependency>
+
+     <dependency>
+       <groupId>com.google.apis</groupId>
+       <artifactId>google-api-services-plus</artifactId>
+       <version>v1-rev60-1.14.1-beta</version>
+     </dependency>
+     <dependency>
+       <groupId>com.google.apis</groupId>
+       <artifactId>google-api-services-oauth2</artifactId>
+       <version>v2-rev29-1.13.2-beta</version>
+     </dependency>
+
    </dependencies>
    <build>
       <finalName>facebookTest</finalName>
@@ -41,4 +77,13 @@
          </plugin>
       </plugins>
    </build>
+
+  <!-- Needed for Google+ -->
+  <repositories>
+    <repository>
+      <id>google-api-services</id>
+      <url>http://google-api-client-libraries.appspot.com/mavenrepo</url>
+    </repository>
+  </repositories>
+
 </project>
