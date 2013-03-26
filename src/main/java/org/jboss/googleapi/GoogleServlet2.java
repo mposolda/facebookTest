@@ -12,13 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -40,9 +37,11 @@ public class GoogleServlet2 extends HttpServlet {
     private static final String CLIENT_ID = "1003123187137.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "XBo85Pur98HUBnlQrYzcST63";
     private static final String REDIRECT_URI = "http://server.local.network.cz:8080/facebookTest/test4";
-    private static final String[] SCOPES = {"https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/plus.login",
-            "https://www.googleapis.com/auth/plus.login"};
+    private static final String[] SCOPES = {
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/plus.login"
+    };
 
     /**
      * Default HTTP transport to use to make HTTP requests.
@@ -237,6 +236,7 @@ public class GoogleServlet2 extends HttpServlet {
         if (currentPage > 1) {
             writer.println("<a href=\"" + request.getRequestURI() + "?page=prev\">Previous page</a>");
         }
+        // Show link for next page
         if (nextPageToken != null) {
             pgContext.setTokenForPage(pgContext.getCurrentPage() + 1, nextPageToken);
             writer.println("<a href=\"" + request.getRequestURI() + "?page=next\">Next page</a><br>");

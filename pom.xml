@@ -18,7 +18,7 @@
          <groupId>javax.servlet</groupId>
          <artifactId>servlet-api</artifactId>
          <version>2.5</version>
-         <!--<scope>provided</scope>-->
+         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.json</groupId>
@@ -50,6 +50,7 @@
        <version>11.0.2</version>
      </dependency>
 
+     <!-- Apis dependencies (these are only in google repository) -->
      <dependency>
        <groupId>com.google.apis</groupId>
        <artifactId>google-api-services-plus</artifactId>
