@@ -25,6 +25,10 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
 import com.google.api.services.plus.Plus;
+import com.google.api.services.plus.model.Activity;
+import com.google.api.services.plus.model.ActivityFeed;
+import com.google.api.services.plus.model.Comment;
+import com.google.api.services.plus.model.CommentFeed;
 import com.google.api.services.plus.model.PeopleFeed;
 import com.google.api.services.plus.model.Person;
 
@@ -153,13 +157,37 @@ public class GoogleServlet2 extends HttpServlet {
                 .setApplicationName("Some app name")
                 .build();
 
-
+        processActivities(service, writer);
         processPeople(service, request, session, writer);
 
     }
 
+    // TODO: cache this somehow...
+    private void processActivities(Plus service, PrintWriter writer) throws IOException {
+        // See https://developers.google.com/+/api/latest/activities/list for details
+        Plus.Activities.List list  = service.activities().list("me", "public");
+        list.setMaxResults(10L);
+        ActivityFeed activityFeed = list.execute();
+
+        writer.println("<h2>Your last google+ activities</h2>");
+        for (Activity activity : activityFeed.getItems()) {
+            Activity.PlusObject activityObject = activity.getObject();
+            writer.println(activity.getTitle() + "<br>");
+            writer.println("<b>Likes: </b>" + activityObject.getPlusoners().getTotalItems() + ", <b>Resharers: </b>" + activityObject.getResharers().getTotalItems());
+            writer.println("<a href=\"" + activity.getUrl() + "\">Activity details</a><br><br>");
+
+            CommentFeed comments = service.comments().list(activity.getId()).execute();
+            for (Comment comment : comments.getItems()) {
+                writer.println("<b>Comment from " + comment.getActor().getDisplayName() + ": </b>" + comment.getObject().getContent()
+                        + ", <b>Likes: </b>" + comment.getPlusoners().getTotalItems() + "<br>");
+            }
+
+            writer.println("<hr>");
+        }
+    }
+
     private void processPeople(Plus service, HttpServletRequest request, HttpSession session, PrintWriter writer) throws IOException {
-        // Get a list of people that this user has shared with this app. See https://developers.google.com/+/api/latest/people/list for details
+        // See https://developers.google.com/+/api/latest/people/list for details
         Plus.People.List list = service.people().list("me", "visible");
         // Possible values are "alphabetical", "best"
         list.setOrderBy("alphabetical");
@@ -180,7 +208,7 @@ public class GoogleServlet2 extends HttpServlet {
             } else if ("next".equals(pageParam)) {
                 pgContext.increaseCurrentPage();
             } else {
-                throw new RuntimeException("Illegal value of prequest parameter page. Value was " + pageParam);
+                throw new RuntimeException("Illegal value of request parameter page. Value was " + pageParam);
             }
         }
 
@@ -189,7 +217,7 @@ public class GoogleServlet2 extends HttpServlet {
         PeopleFeed peopleFeed = list.execute();
         List<Person> people = peopleFeed.getItems();
 
-        writer.println("<h3>Your google+ friends</h3>");
+        writer.println("<h2>Your google+ friends</h2>");
         writer.println("Total number of friends: " + peopleFeed.getTotalItems() + "<br>");
 
         for (Person person : people) {
@@ -215,5 +243,7 @@ public class GoogleServlet2 extends HttpServlet {
         }
 
         session.setAttribute("paginationContext", pgContext);
+
+        writer.println("<hr>");
     }
 }
