@@ -21,6 +21,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
+import com.google.api.services.oauth2.model.Userinfo;
 import com.google.api.services.plus.Plus;
 import com.google.api.services.plus.model.Activity;
 import com.google.api.services.plus.model.ActivityFeed;
@@ -135,6 +136,10 @@ public class GoogleServlet2 extends HttpServlet {
         if (!tokenInfo.getIssuedTo().equals(CLIENT_ID)) {
             throw new RuntimeException("Token's client ID does not match app's. clientID from tokenINFO: " + tokenInfo.getIssuedTo());
         }
+
+        // Now let's obtain userProfile and print it to STDOUT
+        Userinfo uinfo = oauth2.userinfo().v2().me().get().execute();
+        System.out.println("USER INFO: " + uinfo);
 
         return tokenResponse;
     }
