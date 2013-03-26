@@ -3,8 +3,8 @@ package org.jboss.googleapi;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +26,7 @@ import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Tokeninfo;
 import com.google.api.services.plus.Plus;
 import com.google.api.services.plus.model.PeopleFeed;
+import com.google.api.services.plus.model.Person;
 
 /**
  * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
@@ -60,7 +61,7 @@ public class GoogleServlet2 extends HttpServlet {
         } else if ("started".equals(state)) {
             String state2 = req.getParameter("state");
 
-            // Validation of 'state'. Useful to prevent some types of attack
+            // Validation of 'state'. Useful to prevent some types of attack (should be random value instead)
             if (!"/somethinggg".equals(state2)) {
                 throw new ServletException("State is not equals to original value!!!");
             }
@@ -68,10 +69,15 @@ public class GoogleServlet2 extends HttpServlet {
             String code = req.getParameter("code");
             GoogleTokenResponse tokenResponse = exchangeCodeForAccessToken(req, resp, code);
 
-            callOperations(tokenResponse, resp.getWriter());
+            // Finish OAuth workflow and save access token
+            req.getSession().setAttribute("state", "finished");
+            req.getSession().setAttribute("token", tokenResponse);
 
-            // Clear state
-            req.getSession().removeAttribute("state");
+            callOperations(req, resp, tokenResponse);
+        } else if ("finished".equals(state)) {
+            GoogleTokenResponse tokenResponse = (GoogleTokenResponse)req.getSession().getAttribute("token");
+
+            callOperations(req, resp, tokenResponse);
         }
     }
 
@@ -130,7 +136,11 @@ public class GoogleServlet2 extends HttpServlet {
         return tokenResponse;
     }
 
-    private void callOperations(GoogleTokenResponse tokenData, PrintWriter writer) throws IOException {
+    private void callOperations(HttpServletRequest request, HttpServletResponse response, GoogleTokenResponse tokenData) throws IOException {
+
+        HttpSession session = request.getSession();
+        PrintWriter writer = response.getWriter();
+
         // Build credential from stored token data.
         GoogleCredential credential = new GoogleCredential.Builder()
                 .setJsonFactory(JSON_FACTORY)
@@ -143,10 +153,67 @@ public class GoogleServlet2 extends HttpServlet {
                 .setApplicationName("Some app name")
                 .build();
 
-        // Get a list of people that this user has shared with this app.
-        PeopleFeed people = service.people().list("me", "visible").execute();
 
-        System.out.println(people.toString());
-        writer.println(people);
+        processPeople(service, request, session, writer);
+
+    }
+
+    private void processPeople(Plus service, HttpServletRequest request, HttpSession session, PrintWriter writer) throws IOException {
+        // Get a list of people that this user has shared with this app. See https://developers.google.com/+/api/latest/people/list for details
+        Plus.People.List list = service.people().list("me", "visible");
+        // Possible values are "alphabetical", "best"
+        list.setOrderBy("alphabetical");
+        // Number of results per page
+        list.setMaxResults(10L);
+
+        // Try to obtain last pagination token
+        PaginationContext pgContext = (PaginationContext)session.getAttribute("paginationContext");
+        if (pgContext == null) {
+            pgContext = new PaginationContext();
+        }
+
+        // Try to update pgContext with number of current page
+        String pageParam = request.getParameter("page");
+        if (pageParam != null) {
+            if ("prev".equals(pageParam)) {
+                pgContext.decreaseCurrentPage();
+            } else if ("next".equals(pageParam)) {
+                pgContext.increaseCurrentPage();
+            } else {
+                throw new RuntimeException("Illegal value of prequest parameter page. Value was " + pageParam);
+            }
+        }
+
+        list.setPageToken(pgContext.getTokenOfCurrentPage());
+
+        PeopleFeed peopleFeed = list.execute();
+        List<Person> people = peopleFeed.getItems();
+
+        writer.println("<h3>Your google+ friends</h3>");
+        writer.println("Total number of friends: " + peopleFeed.getTotalItems() + "<br>");
+
+        for (Person person : people) {
+            String displayName = person.getDisplayName();
+            String imageURL = person.getImage().getUrl();
+            String personUrl = person.getUrl();
+
+            writer.println("<a href=\"" + personUrl + "\"><img src=\"" + imageURL + "\" title=\"" + displayName + "\" /></a>");
+        }
+
+        // Obtain next token to session if it's available
+        String nextPageToken = peopleFeed.getNextPageToken();
+        int currentPage = pgContext.getCurrentPage();
+
+        writer.println("<br>Current page: " + currentPage + "<br>");
+        // Show link for previous page
+        if (currentPage > 1) {
+            writer.println("<a href=\"" + request.getRequestURI() + "?page=prev\">Previous page</a>");
+        }
+        if (nextPageToken != null) {
+            pgContext.setTokenForPage(pgContext.getCurrentPage() + 1, nextPageToken);
+            writer.println("<a href=\"" + request.getRequestURI() + "?page=next\">Next page</a><br>");
+        }
+
+        session.setAttribute("paginationContext", pgContext);
     }
 }
