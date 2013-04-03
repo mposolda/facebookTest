@@ -16,6 +16,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeReque
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -95,7 +97,7 @@ public class GoogleServlet2 extends HttpServlet {
     private boolean initialInteraction(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Generate the URL to which we will direct users
         String authorizeUrl = new GoogleAuthorizationCodeRequestUrl(CLIENT_ID,
-                REDIRECT_URI, Arrays.asList(SCOPES)).setState("/somethinggg").build();
+                REDIRECT_URI, Arrays.asList(SCOPES)).setState("/somethinggg").setAccessType("offline").build();
         System.out.println("URL to send to Google+: " + authorizeUrl);
 
         try {
@@ -121,7 +123,7 @@ public class GoogleServlet2 extends HttpServlet {
 
 
         // Check that the token is valid.
-        Oauth2 oauth2 = new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential).build();
+        Oauth2 oauth2 = new Oauth2.Builder(TRANSPORT, JSON_FACTORY, credential).setApplicationName("Some app name").build();
         Tokeninfo tokenInfo = oauth2.tokeninfo().setAccessToken(credential.getAccessToken()).execute();
 
         // If there was an error in the token info, abort.
@@ -149,6 +151,26 @@ public class GoogleServlet2 extends HttpServlet {
         HttpSession session = request.getSession();
         PrintWriter writer = response.getWriter();
 
+        // Create a new authorized API client.
+        Plus service = initPlusService(tokenData);
+
+        // Obtain action from request parameter
+        String action = request.getParameter("action");
+
+        if ("showActivities".equals(action)) {
+            System.out.println("Displaying activities");
+            processActivities(service, writer);
+        } else if ("revokeToken".equals(action)) {
+            System.out.println("Revoking token");
+            revokeToken(request, tokenData);
+        } else {
+            // Show people by default
+            System.out.println("Showing friends");
+            processPeople(service, request, session, writer);
+        }
+    }
+
+    private Plus initPlusService(GoogleTokenResponse tokenData) {
         // Build credential from stored token data.
         GoogleCredential credential = new GoogleCredential.Builder()
                 .setJsonFactory(JSON_FACTORY)
@@ -160,9 +182,18 @@ public class GoogleServlet2 extends HttpServlet {
         Plus service = new Plus.Builder(TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName("Some app name")
                 .build();
+        return service;
+    }
 
-        processActivities(service, writer);
-        processPeople(service, request, session, writer);
+    private void revokeToken(HttpServletRequest req, GoogleTokenResponse tokenData) throws IOException {
+        // Execute HTTP GET request to revoke current token.
+        HttpResponse revokeResponse = TRANSPORT.createRequestFactory()
+                .buildGetRequest(new GenericUrl("https://accounts.google.com/o/oauth2/revoke?token=" + tokenData.getAccessToken())).execute();
+
+        System.out.println("Google+ token revoked. Going to cleanup session");
+        req.getSession().removeAttribute("state");
+        req.getSession().removeAttribute("token");
+
 
     }
 
