@@ -2,6 +2,7 @@ package org.jboss.facebook.restfb;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -12,8 +13,10 @@ import javax.servlet.http.HttpSession;
 
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
+import com.restfb.Facebook;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
+import com.restfb.json.JsonObject;
 import com.restfb.types.Comment;
 import com.restfb.types.NamedFacebookType;
 import com.restfb.types.StatusMessage;
@@ -78,9 +81,17 @@ public class FacebookServlet3 extends HttpServlet {
 
 
 
-        // TODO: performance
+        // Collect IDS of friends to display
+        List<String> ids = new ArrayList<String>();
         for (NamedFacebookType current : friendsToDisplay) {
-            UserWithPicture friendWithPicture = facebookClient.fetchObject(current.getId(), UserWithPicture.class, Parameter.with("fields", "id,name,picture"));
+            ids.add(current.getId());
+        }
+        // Fetch them all
+        JsonObject friendsResult = facebookClient.fetchObjects(ids, JsonObject.class, Parameter.with("fields", "id,name,picture"));
+
+        for (String id : ids) {
+            JsonObject current = friendsResult.getJsonObject(id);
+            UserWithPicture friendWithPicture = facebookClient.getJsonMapper().toJavaObject(current.toString(), UserWithPicture.class);
             String urlForPersonDetail = req.getContextPath() + req.getServletPath() + "?friendId=" + friendWithPicture.getId();
             out.println("<img src=\"" + friendWithPicture.getPicture().getData().getUrl() + "\" /><a href=\"" + urlForPersonDetail + "\">" + friendWithPicture.getName() + "</a><br>");
         }
@@ -121,5 +132,15 @@ public class FacebookServlet3 extends HttpServlet {
     {
         System.out.println("FBS3: doPost");
         doGet(req, resp);
+    }
+
+    public static class FriendsList {
+
+        @Facebook("data")
+        List<UserWithPicture> data;
+
+        public List<UserWithPicture> getData() {
+            return data;
+        }
     }
 }
