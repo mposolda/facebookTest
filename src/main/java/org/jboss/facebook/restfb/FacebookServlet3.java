@@ -13,7 +13,6 @@ import javax.servlet.http.HttpSession;
 
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
-import com.restfb.Facebook;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.json.JsonObject;
@@ -28,14 +27,14 @@ import com.restfb.types.User;
 public class FacebookServlet3 extends HttpServlet {
 
     // "email"
-    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBALeh8TkyePQcKVUwHBqByGmVdbZBIZB0ZAEdctdhfPiwArjZBlfiZBNsU76WjKqmf4Xtcz73hRHaYHZAAL5Ww9ZACSgkQeTq9FWJ1ZALHBV2";
+    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBALvSKvYqN2ZCOdlssZAVoxPGH5yZCv07iGLqDtvDwLmZAFPj7ZBGJPEgbMfPx8aBNXUWgqnZAL9MPvBXFlZCKBIZCyB1PqhKRvvBw6YrG4k9";
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         System.out.println("FBS3: doGet for URL " + req.getRequestURI());
-        resp.setContentType("text/html");
+        resp.setContentType("text/html; charset=\"utf-8\"");
         HttpSession session = req.getSession();
         PrintWriter out = resp.getWriter();
 
@@ -46,7 +45,7 @@ public class FacebookServlet3 extends HttpServlet {
         out.println("email: " + user.getEmail() + "<br>");
         out.println("<hr>");
 
-        // Count total number of friends, TODO: cache
+        // Count total number of friends
         Integer friendsCount = (Integer)session.getAttribute("friendsCount");
         if (friendsCount == null) {
             Connection<NamedFacebookType> myFriends = facebookClient.fetchConnection("me/friends", NamedFacebookType.class);
