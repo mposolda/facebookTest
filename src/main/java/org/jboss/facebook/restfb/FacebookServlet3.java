@@ -28,7 +28,7 @@ import com.restfb.types.User;
 public class FacebookServlet3 extends HttpServlet {
 
     // "email"
-    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBAKcier7PlmBFlZCmCyoPZBWvwMrLTXI2goTqZAuMRz8EkdcQ6y8KZC6bSMcd2mxFTKbcOx1WO2MxLhnrBhwckvNAgFlUEHP0mjZCKZCFVH";
+    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBALeh8TkyePQcKVUwHBqByGmVdbZBIZB0ZAEdctdhfPiwArjZBlfiZBNsU76WjKqmf4Xtcz73hRHaYHZAAL5Ww9ZACSgkQeTq9FWJ1ZALHBV2";
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
@@ -99,27 +99,22 @@ public class FacebookServlet3 extends HttpServlet {
 
         String friendId = req.getParameter("friendId");
         if (friendId != null) {
-            User friend = facebookClient.fetchObject(friendId, User.class);
-            out.println("Friend name: " + friend.getName());
             Connection<StatusMessage> statusMessageConnection = facebookClient.fetchConnection(friendId + "/statuses", StatusMessage.class, Parameter.with("limit", 5));
             List<StatusMessage> statuses = statusMessageConnection.getData();
 
             for (StatusMessage statusMessage : statuses) {
-                out.println("Message: " + statusMessage.getMessage() + "<br>");
-                out.println("Author: " + statusMessage.getFrom().getName() + "<br>");
-                out.println("Time: " + statusMessage.getUpdatedTime() + "<br>");
-                out.println("Likes: " + statusMessage.getLikes().size() + "<br>");
-                for (NamedFacebookType like : statusMessage.getLikes()) {
-                    out.println("liker: " + like.getName() + "<br>");
-                }
+                out.println("<b>Status message: </b>" + statusMessage.getMessage() + "<br>");
+                out.println("<div style=\"font-size: 13px;\">");
+                out.println("Time: " + statusMessage.getUpdatedTime() + " - ");
+                out.println("<img src=\"TODO:some-thumbs-picture.gif\" alt=\"Likes: " + statusMessage.getLikes().size() + "\" title=\"" + getLikersText(statusMessage.getLikes()) + "\" /></div><br><hr>");
 
                 List<Comment> comments = statusMessage.getComments();
+                out.println("<b>Comments: </b><br>");
                 for (Comment comment : comments) {
-                    out.println("Comment: " + comment.getMessage() + "<br>");
-                    out.println("Comment author: " + comment.getFrom().getName() + "<br>");
-                    out.println("Comment time: " + comment.getCreatedTime() + "<br>");
-                    out.println("Comment likes count: " + comment.getLikeCount() + "<br>");
+                    out.println("<i>" + comment.getFrom().getName() + "</i>: " + comment.getMessage() + "<br>");
+                    out.println("<div style=\"font-size: 11px;\">Time: " + comment.getCreatedTime() + " - Likes: " + comment.getLikeCount() + "</div><br>");
                 }
+                out.println("<br><br><hr>");
             }
             out.println("</td></tr></table>");
         }
@@ -134,13 +129,11 @@ public class FacebookServlet3 extends HttpServlet {
         doGet(req, resp);
     }
 
-    public static class FriendsList {
-
-        @Facebook("data")
-        List<UserWithPicture> data;
-
-        public List<UserWithPicture> getData() {
-            return data;
+    private String getLikersText(List<NamedFacebookType> likers) {
+        StringBuilder builder = new StringBuilder();
+        for (NamedFacebookType like : likers) {
+            builder.append(like.getName() + "\n");
         }
+        return builder.toString();
     }
 }
