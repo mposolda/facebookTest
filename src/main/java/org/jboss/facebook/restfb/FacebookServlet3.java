@@ -25,7 +25,7 @@ import com.restfb.types.User;
 public class FacebookServlet3 extends HttpServlet {
 
     // "email"
-    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBABSccdQpZCPkitZBcUsj8BSYJXDZB3pxQ6uK9oVfR9vubLp7wywisjoWNWhPCZAXB0t6IbyhJBWGVxNhuvAsElcan9lZB6fBxndEyZCI0n";
+    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBAKcier7PlmBFlZCmCyoPZBWvwMrLTXI2goTqZAuMRz8EkdcQ6y8KZC6bSMcd2mxFTKbcOx1WO2MxLhnrBhwckvNAgFlUEHP0mjZCKZCFVH";
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
@@ -66,7 +66,7 @@ public class FacebookServlet3 extends HttpServlet {
         Integer indexStart = (pageNumber - 1) * ITEMS_PER_PAGE;
         List<NamedFacebookType> friendsToDisplay = facebookClient.fetchConnection("me/friends", NamedFacebookType.class, Parameter.with("offset", indexStart), Parameter.with("limit", ITEMS_PER_PAGE)).getData();
 
-
+        out.println("<table border><tr><td width=\"50%\" style=\"vertical-align: top\">");
         out.println("Count of friends: " + friendsCount + "<br>");
         out.println("Page: " + pageNumber + "<br>");
         out.println("Select page: ");
@@ -74,7 +74,7 @@ public class FacebookServlet3 extends HttpServlet {
             String url = req.getContextPath() + req.getServletPath() + "?page=" + i;
             out.print("<a href=\"" + url + "\">" + i + "</a> ");
         }
-        out.println("<br>");
+        out.println("<br><br><hr><br>");
 
 
 
@@ -82,9 +82,9 @@ public class FacebookServlet3 extends HttpServlet {
         for (NamedFacebookType current : friendsToDisplay) {
             UserWithPicture friendWithPicture = facebookClient.fetchObject(current.getId(), UserWithPicture.class, Parameter.with("fields", "id,name,picture"));
             String urlForPersonDetail = req.getContextPath() + req.getServletPath() + "?friendId=" + friendWithPicture.getId();
-            out.println("<a href=\"" + urlForPersonDetail + "\"><img src=\"" + friendWithPicture.getPicture().getData().getUrl() + "\" title=\"" +  friendWithPicture.getName() + "\" /></a>");
+            out.println("<img src=\"" + friendWithPicture.getPicture().getData().getUrl() + "\" /><a href=\"" + urlForPersonDetail + "\">" + friendWithPicture.getName() + "</a><br>");
         }
-        out.println("<hr>");
+        out.println("</td><td style=\"vertical-align: top\">");
 
         String friendId = req.getParameter("friendId");
         if (friendId != null) {
@@ -110,7 +110,7 @@ public class FacebookServlet3 extends HttpServlet {
                     out.println("Comment likes count: " + comment.getLikeCount() + "<br>");
                 }
             }
-            System.out.println(statuses);
+            out.println("</td></tr></table>");
         }
 
         System.out.println("end");
