@@ -101,19 +101,23 @@ public class FacebookServlet3 extends HttpServlet {
             Connection<StatusMessage> statusMessageConnection = facebookClient.fetchConnection(friendId + "/statuses", StatusMessage.class, Parameter.with("limit", 5));
             List<StatusMessage> statuses = statusMessageConnection.getData();
 
-            for (StatusMessage statusMessage : statuses) {
-                out.println("<b>Status message: </b>" + statusMessage.getMessage() + "<br>");
-                out.println("<div style=\"font-size: 13px;\">");
-                out.println("Time: " + statusMessage.getUpdatedTime() + " - ");
-                out.println("<img src=\"TODO:some-thumbs-picture.gif\" alt=\"Likes: " + statusMessage.getLikes().size() + "\" title=\"" + getLikersText(statusMessage.getLikes()) + "\" /></div><br><hr>");
+            if (statuses.size() == 0) {
+                out.println("<b>WARNING: </b>This user doesn't have any public messages or you have insufficient scope. Make sure your access token have scopes: <b>email, friends_status</b>");
+            } else {
+                for (StatusMessage statusMessage : statuses) {
+                    out.println("<b>Status message: </b>" + statusMessage.getMessage() + "<br>");
+                    out.println("<div style=\"font-size: 13px;\">");
+                    out.println("Time: " + statusMessage.getUpdatedTime() + " - ");
+                    out.println("<img src=\"TODO:some-thumbs-picture.gif\" alt=\"Likes: " + statusMessage.getLikes().size() + "\" title=\"" + getLikersText(statusMessage.getLikes()) + "\" /></div><br><hr>");
 
-                List<Comment> comments = statusMessage.getComments();
-                out.println("<b>Comments: </b><br>");
-                for (Comment comment : comments) {
-                    out.println("<i>" + comment.getFrom().getName() + "</i>: " + comment.getMessage() + "<br>");
-                    out.println("<div style=\"font-size: 11px;\">Time: " + comment.getCreatedTime() + " - Likes: " + comment.getLikeCount() + "</div><br>");
+                    List<Comment> comments = statusMessage.getComments();
+                    out.println("<b>Comments: </b><br>");
+                    for (Comment comment : comments) {
+                        out.println("<i>" + comment.getFrom().getName() + "</i>: " + comment.getMessage() + "<br>");
+                        out.println("<div style=\"font-size: 11px;\">Time: " + comment.getCreatedTime() + " - Likes: " + comment.getLikeCount() + "</div><br>");
+                    }
+                    out.println("<br><br><hr>");
                 }
-                out.println("<br><br><hr>");
             }
             out.println("</td></tr></table>");
         }
