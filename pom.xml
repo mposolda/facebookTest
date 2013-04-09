@@ -62,6 +62,13 @@
        <version>v2-rev29-1.13.2-beta</version>
      </dependency>
 
+     <!-- Facebook dependencies -->
+     <dependency>
+       <groupId>com.restfb</groupId>
+       <artifactId>restfb</artifactId>
+       <version>1.6.12</version>
+     </dependency>
+
    </dependencies>
    <build>
       <finalName>facebookTest</finalName>
