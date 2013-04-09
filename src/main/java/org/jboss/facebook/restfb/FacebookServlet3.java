@@ -14,8 +14,9 @@ import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
-import com.restfb.types.FriendList;
+import com.restfb.types.Comment;
 import com.restfb.types.NamedFacebookType;
+import com.restfb.types.StatusMessage;
 import com.restfb.types.User;
 
 /**
@@ -24,7 +25,7 @@ import com.restfb.types.User;
 public class FacebookServlet3 extends HttpServlet {
 
     // "email"
-    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBAK0kRFp9Ycwu2nbT3xuE0ei0BzGUqwKYeCpvNcgnGFwM3fRz5MPAncPteqs1cmqqPcR0FEgzZAUx3eQWYxN8USnvoiTFrORK2NYZBZA";
+    private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBABSccdQpZCPkitZBcUsj8BSYJXDZB3pxQ6uK9oVfR9vubLp7wywisjoWNWhPCZAXB0t6IbyhJBWGVxNhuvAsElcan9lZB6fBxndEyZCI0n";
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
@@ -89,8 +90,27 @@ public class FacebookServlet3 extends HttpServlet {
         if (friendId != null) {
             User friend = facebookClient.fetchObject(friendId, User.class);
             out.println("Friend name: " + friend.getName());
+            Connection<StatusMessage> statusMessageConnection = facebookClient.fetchConnection(friendId + "/statuses", StatusMessage.class, Parameter.with("limit", 5));
+            List<StatusMessage> statuses = statusMessageConnection.getData();
 
+            for (StatusMessage statusMessage : statuses) {
+                out.println("Message: " + statusMessage.getMessage() + "<br>");
+                out.println("Author: " + statusMessage.getFrom().getName() + "<br>");
+                out.println("Time: " + statusMessage.getUpdatedTime() + "<br>");
+                out.println("Likes: " + statusMessage.getLikes().size() + "<br>");
+                for (NamedFacebookType like : statusMessage.getLikes()) {
+                    out.println("liker: " + like.getName() + "<br>");
+                }
 
+                List<Comment> comments = statusMessage.getComments();
+                for (Comment comment : comments) {
+                    out.println("Comment: " + comment.getMessage() + "<br>");
+                    out.println("Comment author: " + comment.getFrom().getName() + "<br>");
+                    out.println("Comment time: " + comment.getCreatedTime() + "<br>");
+                    out.println("Comment likes count: " + comment.getLikeCount() + "<br>");
+                }
+            }
+            System.out.println(statuses);
         }
 
         System.out.println("end");
