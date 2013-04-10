@@ -26,7 +26,6 @@ import com.restfb.types.User;
  */
 public class FacebookServlet3 extends HttpServlet {
 
-    // "email"
     private static final String MY_ACCESS_TOKEN1 = "AAACEdEose0cBALvSKvYqN2ZCOdlssZAVoxPGH5yZCv07iGLqDtvDwLmZAFPj7ZBGJPEgbMfPx8aBNXUWgqnZAL9MPvBXFlZCKBIZCyB1PqhKRvvBw6YrG4k9";
     private static final int ITEMS_PER_PAGE = 10;
 

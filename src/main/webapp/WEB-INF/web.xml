@@ -19,6 +19,10 @@
     <servlet-class>org.jboss.facebook.restfb.FacebookServlet3</servlet-class>
   </servlet>
   <servlet>
+    <servlet-name>FacebookServlet4</servlet-name>
+    <servlet-class>org.jboss.facebook.restfb.FacebookServlet4</servlet-class>
+  </servlet>
+  <servlet>
     <servlet-name>GoogleServlet</servlet-name>
     <servlet-class>org.jboss.google.GoogleServlet</servlet-class>
   </servlet>
@@ -38,6 +42,10 @@
   <servlet-mapping>
     <servlet-name>FacebookServlet3</servlet-name>
     <url-pattern>/ftest3</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>FacebookServlet4</servlet-name>
+    <url-pattern>/ftest4</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>GoogleServlet</servlet-name>
