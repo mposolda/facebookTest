@@ -42,7 +42,7 @@ public class FacebookServlet extends HttpServlet
 
    private static final String APP_ID = "317629754933360";
    private static final String APP_SECRET = "e129e8fccdd3382af53c5fb05b09bc92";
-   private static final String MY_URL = "http://server.local.network:8080/facebookTest/test1";
+   private static final String MY_URL = "http://server.local.network.cz:8080/facebookTest/ftest1";
 
 
    @Override
